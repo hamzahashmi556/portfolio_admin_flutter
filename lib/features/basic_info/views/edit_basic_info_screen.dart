@@ -3,14 +3,14 @@ import 'package:portfolio_admin/features/basic_info/model/expreince.dart';
 import 'package:portfolio_admin/services/firebase_service.dart';
 import '../model/basic_info.dart';
 
-class BasicInfoScreen extends StatefulWidget {
-  const BasicInfoScreen({Key? key}) : super(key: key);
+class EditInfoScreen extends StatefulWidget {
+  const EditInfoScreen({Key? key}) : super(key: key);
 
   @override
-  State<BasicInfoScreen> createState() => _BasicInfoScreenState();
+  State<EditInfoScreen> createState() => _EditInfoScreenState();
 }
 
-class _BasicInfoScreenState extends State<BasicInfoScreen> {
+class _EditInfoScreenState extends State<EditInfoScreen> {
   final nameController = TextEditingController();
   final roleController = TextEditingController();
   final emailController = TextEditingController();

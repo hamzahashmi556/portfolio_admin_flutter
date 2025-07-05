@@ -156,9 +156,29 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              info!.name,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  info!.name,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    // Navigate to EditBasicInfo screen
+                    final updated = await Navigator.pushNamed(
+                      context,
+                      '/editBasicInfo',
+                      arguments: info,
+                    );
+                    if (updated == true) loadData(); // Refresh after save
+                  },
+                ),
+              ],
             ),
             Text(
               info!.role,
