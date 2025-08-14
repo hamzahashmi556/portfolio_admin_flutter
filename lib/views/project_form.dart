@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_admin/features/project_info/model/project.dart';
-import 'package:portfolio_admin/services/firebase_service.dart';
+import 'package:portfolio_admin/model/project.dart';
 
 class ProjectForm extends StatefulWidget {
   final Project? project;
@@ -72,11 +71,11 @@ class _ProjectFormState extends State<ProjectForm> {
       tools: toolsController.text.split(',').map((e) => e.trim()).toList(),
     );
 
-    if (widget.docId != null) {
-      await FirestoreService.instance.updateProject(widget.docId!, project);
-    } else {
-      await FirestoreService.instance.addProject(project);
-    }
+    // if (widget.docId != null) {
+    //   await .updateProject(widget.docId!, project);
+    // } else {
+    //   await FirestoreDataSource.instance.addProject(project);
+    // }
 
     if (context.mounted) Navigator.pop(context);
   }
