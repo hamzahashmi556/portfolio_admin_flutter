@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:portfolio_admin/model/expreince.dart';
+import 'package:portfolio_admin/features/experience/model/experience.dart';
 
 class ExperienceService {
   static ExperienceService instance = ExperienceService._privateConstructor();

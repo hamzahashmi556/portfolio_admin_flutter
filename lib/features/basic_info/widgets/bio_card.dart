@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_admin/model/basic_info.dart';
+import 'package:portfolio_admin/features/basic_info/model/basic_info.dart';
 import 'package:portfolio_admin/provider/info_provider.dart';
-import 'package:portfolio_admin/widgets/dialogs/edit_bio.dart';
+import 'package:portfolio_admin/features/basic_info/widgets/edit_bio.dart';
 import 'package:provider/provider.dart';
 
 class BioCard extends StatefulWidget {

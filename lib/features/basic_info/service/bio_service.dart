@@ -3,7 +3,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:portfolio_admin/model/basic_info.dart';
+import 'package:portfolio_admin/features/basic_info/model/basic_info.dart';
 
 class BioService {
   static BioService instance = BioService._privateConstructor();

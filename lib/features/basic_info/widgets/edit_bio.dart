@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_admin/model/basic_info.dart';
+import 'package:portfolio_admin/features/basic_info/model/basic_info.dart';
 import 'package:portfolio_admin/provider/info_provider.dart';
 import 'package:portfolio_admin/widgets/input.dart';
 import 'package:provider/provider.dart';

@@ -1,26 +1,28 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:portfolio_admin/model/expreince.dart';
+import 'package:portfolio_admin/features/experience/model/experience.dart';
 import 'package:portfolio_admin/model/project.dart';
-import 'package:portfolio_admin/services/bio_service.dart';
-import 'package:portfolio_admin/services/experience_service.dart';
+import 'package:portfolio_admin/features/basic_info/service/bio_service.dart';
+import 'package:portfolio_admin/features/experience/service/experience_service.dart';
 import 'package:portfolio_admin/services/project_service.dart';
-import '../model/basic_info.dart';
+import '../features/basic_info/model/basic_info.dart';
 
 class InfoProvider with ChangeNotifier {
   BasicInfo? _info;
-  List<Experience> _experiences = [];
-  List<Project> _projects = [];
-
   BasicInfo? get info => _info;
-  List<Project> get projects => _projects;
+  String bioError = '';
+
+  List<Experience> _experiences = [];
   List<Experience> get experiences => _experiences;
+  String experienceError = '';
+
+  List<Project> _projects = [];
+  List<Project> get projects => _projects;
+  String projectsError = '';
 
   bool isLoading = true;
-  String bioError = '';
-  String experienceError = '';
-  String projectsError = '';
 
   InfoProvider() {
     loadData();
@@ -57,17 +59,29 @@ class InfoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // void updateExperienceList(List<Experience> updatedList) {
-  //   if (_info != null) {
-  //     _info = _info!.copyWith(experienceList: updatedList);
-  //     notifyListeners();
-  //   }
-  // }
+  void addExperience(Experience exp) async {
+    try {
+      ExperienceService.instance.add(exp);
+      _experiences.add(exp);
+    } catch (e) {
+      log('error adding experience $e');
+    }
+    notifyListeners();
+  }
 
-  // void updateSkills(List<String> updatedSkills) {
-  //   if (_info != null) {
-  //     _info = _info!.copyWith(skills: updatedSkills);
-  //     notifyListeners();
-  //   }
-  // }
+  void updateExperience(Experience exp) async {
+    var index = experiences.indexWhere((current) {
+      return current.title == exp.title;
+    });
+    if (index > experiences.length - 1) {
+      return;
+    }
+    try {
+      await ExperienceService.instance.edit(exp);
+      _experiences[index] = exp;
+    } catch (e) {
+      log('error updating experience $e');
+    }
+    notifyListeners();
+  }
 }
