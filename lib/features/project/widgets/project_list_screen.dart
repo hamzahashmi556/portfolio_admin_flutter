@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_admin/features/experience/model/experience.dart';
-import 'package:portfolio_admin/features/experience/service/experience_service.dart';
+import 'package:portfolio_admin/features/project/model/project.dart';
+import 'package:portfolio_admin/features/project/services/project_service.dart';
 import 'package:portfolio_admin/widgets/input.dart';
 
-class ExperienceCard extends StatelessWidget {
-  const ExperienceCard({super.key});
+class ProjectListScreen extends StatelessWidget {
+  const ProjectListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +19,14 @@ class ExperienceCard extends StatelessWidget {
               children: [
                 const Expanded(
                   child: Text(
-                    'Experience',
+                    'Projects',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
                 FilledButton.icon(
                   onPressed: () => showDialog(
                     context: context,
-                    builder: (_) => _ExperienceDialog(),
+                    builder: (_) => _ProjectDialog(),
                   ),
                   icon: const Icon(Icons.add),
                   label: const Text('Add'),
@@ -34,26 +34,26 @@ class ExperienceCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            StreamBuilder<List<Experience>>(
-              stream: ExperienceService.instance.stream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            StreamBuilder<List<Project>>(
+              stream: ProjectService.instance.stream(),
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
                   return const Padding(
                     padding: EdgeInsets.all(16),
                     child: CircularProgressIndicator(),
                   );
                 }
-                if (snapshot.hasError) {
+                if (snap.hasError) {
                   return Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text('Error: ${snapshot.error}'),
+                    child: Text('Error: ${snap.error}'),
                   );
                 }
-                final items = snapshot.data ?? [];
+                final items = snap.data ?? [];
                 if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('No experience yet.'),
+                    child: Text('No projects yet.'),
                   );
                 }
                 return ListView.separated(
@@ -62,12 +62,17 @@ class ExperienceCard extends StatelessWidget {
                   itemCount: items.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, i) {
-                    final e = items[i];
-                    final date =
-                        '${_fmt(e.startDate)} - ${e.isCurrent ? 'Present' : (e.endDate == null ? '—' : _fmt(e.endDate!))}';
+                    final p = items[i];
                     return ListTile(
-                      title: Text('${e.title} · ${e.company}'),
-                      subtitle: Text('${e.location} • $date'),
+                      leading: p.coverUrl == null || p.coverUrl!.isEmpty
+                          ? const CircleAvatar(child: Icon(Icons.apps))
+                          : CircleAvatar(
+                              backgroundImage: NetworkImage(p.coverUrl!),
+                            ),
+                      title: Text(p.name),
+                      subtitle: Text(
+                        '${p.role} • ${p.featured ? "Featured" : "Regular"}',
+                      ),
                       trailing: Wrap(
                         spacing: 8,
                         children: [
@@ -76,7 +81,7 @@ class ExperienceCard extends StatelessWidget {
                             icon: const Icon(Icons.edit),
                             onPressed: () => showDialog(
                               context: context,
-                              builder: (_) => _ExperienceDialog(editing: e),
+                              builder: (_) => _ProjectDialog(editing: p),
                             ),
                           ),
                           IconButton(
@@ -86,7 +91,7 @@ class ExperienceCard extends StatelessWidget {
                               final ok = await showDialog<bool>(
                                 context: context,
                                 builder: (_) => AlertDialog(
-                                  title: const Text('Delete experience?'),
+                                  title: const Text('Delete project?'),
                                   content: const Text('This cannot be undone.'),
                                   actions: [
                                     TextButton(
@@ -103,7 +108,7 @@ class ExperienceCard extends StatelessWidget {
                                 ),
                               );
                               if (ok == true) {
-                                await ExperienceService.instance.delete(e.id);
+                                await ProjectService.instance.delete(p.id);
                               }
                             },
                           ),
@@ -119,49 +124,52 @@ class ExperienceCard extends StatelessWidget {
       ),
     );
   }
-
-  static String _fmt(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}';
 }
 
-class _ExperienceDialog extends StatefulWidget {
-  final Experience? editing;
-  const _ExperienceDialog({this.editing});
+class _ProjectDialog extends StatefulWidget {
+  final Project? editing;
+  const _ProjectDialog({this.editing});
 
   @override
-  State<_ExperienceDialog> createState() => _ExperienceDialogState();
+  State<_ProjectDialog> createState() => _ProjectDialogState();
 }
 
-class _ExperienceDialogState extends State<_ExperienceDialog> {
-  final _title = TextEditingController();
-  final _company = TextEditingController();
-  final _location = TextEditingController();
-  final _summary = TextEditingController(); // CSV for highlights
-  final _tech = TextEditingController(); // CSV for tech
-  DateTime? _start;
-  DateTime? _end;
-  bool _isCurrent = false;
+class _ProjectDialogState extends State<_ProjectDialog> {
+  final _name = TextEditingController();
+  final _summary = TextEditingController();
+  final _role = TextEditingController();
+  final _tech = TextEditingController(); // CSV
+  final _github = TextEditingController();
+  final _liveUrl = TextEditingController();
+  final _coverUrl = TextEditingController();
+  final _sortOrder = TextEditingController(text: '0');
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _featured = false;
 
   @override
   void initState() {
     super.initState();
-    final e = widget.editing;
-    if (e != null) {
-      _title.text = e.title;
-      _company.text = e.company;
-      _location.text = e.location;
-      _summary.text = e.highlights.join(', ');
-      _tech.text = e.tech.join(', ');
-      _start = e.startDate;
-      _end = e.endDate;
-      _isCurrent = e.isCurrent;
+    final p = widget.editing;
+    if (p != null) {
+      _name.text = p.name;
+      _summary.text = p.summary;
+      _role.text = p.role;
+      _tech.text = p.tech.join(', ');
+      _github.text = p.github ?? '';
+      _liveUrl.text = p.liveUrl ?? '';
+      _coverUrl.text = p.coverUrl ?? '';
+      _featured = p.featured;
+      _sortOrder.text = p.sortOrder.toString();
+      _startDate = p.startDate;
+      _endDate = p.endDate;
     }
   }
 
   Future<void> _pickDate(bool start) async {
     final now = DateTime.now();
-    final first = DateTime(now.year - 30, 1, 1);
-    final initial = start ? (_start ?? now) : (_end ?? now);
+    final first = DateTime(now.year - 20, 1, 1);
+    final initial = start ? (_startDate ?? now) : (_endDate ?? now);
     final picked = await showDatePicker(
       context: context,
       firstDate: first,
@@ -171,9 +179,9 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
     if (picked != null) {
       setState(() {
         if (start)
-          _start = picked;
+          _startDate = picked;
         else
-          _end = picked;
+          _endDate = picked;
       });
     }
   }
@@ -181,30 +189,44 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        widget.editing == null ? 'Add Experience' : 'Edit Experience',
-      ),
+      title: Text(widget.editing == null ? 'Add Project' : 'Edit Project'),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width > 480 ? 520 : double.infinity,
+        width: MediaQuery.of(context).size.width > 520 ? 560 : double.infinity,
         child: SingleChildScrollView(
           child: Column(
             children: [
+              CustomInput(controller: _name, label: 'Name'),
+              CustomInput(controller: _summary, label: 'Summary', maxLines: 3),
+              CustomInput(controller: _role, label: 'Role'),
               CustomInput(
-                controller: _title,
-                label: 'Title',
-                hint: 'e.g. Senior iOS Engineer',
+                controller: _tech,
+                label: 'Tech (comma-separated)',
+                hint: 'Flutter, Firebase, Node.js',
               ),
-              CustomInput(controller: _company, label: 'Company'),
-              CustomInput(controller: _location, label: 'Location'),
+              CustomInput(
+                controller: _github,
+                label: 'GitHub URL',
+                keyboardType: TextInputType.url,
+              ),
+              CustomInput(
+                controller: _liveUrl,
+                label: 'Live URL',
+                keyboardType: TextInputType.url,
+              ),
+              CustomInput(
+                controller: _coverUrl,
+                label: 'Cover Image URL (optional)',
+                keyboardType: TextInputType.url,
+              ),
               Row(
                 children: [
                   Expanded(
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        _start == null
+                        _startDate == null
                             ? 'Start Date'
-                            : 'Start: ${_start!.year}-${_start!.month.toString().padLeft(2, '0')}',
+                            : 'Start: ${_startDate!.year}-${_startDate!.month.toString().padLeft(2, "0")}',
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.calendar_month),
@@ -217,15 +239,13 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        _isCurrent
-                            ? 'End: Present'
-                            : (_end == null
-                                  ? 'End Date'
-                                  : 'End: ${_end!.year}-${_end!.month.toString().padLeft(2, '0')}'),
+                        _endDate == null
+                            ? 'End Date'
+                            : 'End: ${_endDate!.year}-${_endDate!.month.toString().padLeft(2, "0")}',
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.calendar_month),
-                        onPressed: _isCurrent ? null : () => _pickDate(false),
+                        onPressed: () => _pickDate(false),
                       ),
                     ),
                   ),
@@ -233,24 +253,21 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Currently working here'),
-                value: _isCurrent,
-                onChanged: (v) => setState(() {
-                  _isCurrent = v;
-                  if (v) _end = null;
-                }),
+                title: const Text('Featured'),
+                value: _featured,
+                onChanged: (v) => setState(() => _featured = v),
               ),
-              CustomInput(
-                controller: _summary,
-                label: 'Highlights (comma-separated)',
-                maxLines: 2,
-                hint: 'e.g. Led refactor, Launched v2, Cut crash rate 60%',
+              TextField(
+                controller: _sortOrder,
+                decoration: const InputDecoration(
+                  labelText: 'Sort Order (0..n)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              CustomInput(
-                controller: _tech,
-                label: 'Tech (comma-separated)',
-                hint: 'e.g. Swift, SwiftUI, Firebase',
-              ),
+              const SizedBox(height: 12),
+              // If you want to support uploading to Firebase Storage later, you can
+              // add a small "Upload" button here using file_picker + firebase_storage.
             ],
           ),
         ),
@@ -262,29 +279,34 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
         ),
         FilledButton(
           onPressed: () async {
-            if (_start == null || _title.text.trim().isEmpty) {
+            if (_name.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Title and start date are required.'),
-                ),
+                const SnackBar(content: Text('Name is required.')),
               );
               return;
             }
-            final e = Experience(
+            final project = Project(
               id: widget.editing?.id ?? '',
-              title: _title.text.trim(),
-              company: _company.text.trim(),
-              location: _location.text.trim(),
-              startDate: _start!,
-              endDate: _isCurrent ? null : _end,
-              isCurrent: _isCurrent,
-              highlights: _splitCsv(_summary.text),
+              name: _name.text.trim(),
+              summary: _summary.text.trim(),
+              role: _role.text.trim(),
               tech: _splitCsv(_tech.text),
+              github: _github.text.trim().isEmpty ? null : _github.text.trim(),
+              liveUrl: _liveUrl.text.trim().isEmpty
+                  ? null
+                  : _liveUrl.text.trim(),
+              coverUrl: _coverUrl.text.trim().isEmpty
+                  ? null
+                  : _coverUrl.text.trim(),
+              featured: _featured,
+              sortOrder: int.tryParse(_sortOrder.text.trim()) ?? 0,
+              startDate: _startDate,
+              endDate: _endDate,
             );
             if (widget.editing == null) {
-              await ExperienceService.instance.add(e);
+              await ProjectService.instance.add(project);
             } else {
-              await ExperienceService.instance.update(e);
+              await ProjectService.instance.update(project);
             }
             if (context.mounted) Navigator.pop(context);
           },
@@ -294,11 +316,6 @@ class _ExperienceDialogState extends State<_ExperienceDialog> {
     );
   }
 
-  List<String> _splitCsv(String s) {
-    return s
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-  }
+  List<String> _splitCsv(String s) =>
+      s.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 }

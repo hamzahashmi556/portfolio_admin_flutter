@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio_admin/provider/info_provider.dart';
-import 'package:portfolio_admin/views/project_list_screen.dart';
+import 'package:portfolio_admin/features/project/widgets/project_list_screen.dart';
 import 'package:portfolio_admin/features/basic_info/widgets/bio_card.dart';
 import 'package:portfolio_admin/features/experience/widgets/experience_card.dart';
 import 'package:provider/provider.dart';

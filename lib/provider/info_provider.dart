@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio_admin/features/experience/model/experience.dart';
-import 'package:portfolio_admin/model/project.dart';
+import 'package:portfolio_admin/features/project/model/project.dart';
 import 'package:portfolio_admin/features/basic_info/service/bio_service.dart';
 import 'package:portfolio_admin/features/experience/service/experience_service.dart';
-import 'package:portfolio_admin/services/project_service.dart';
+import 'package:portfolio_admin/features/project/services/project_service.dart';
 import '../features/basic_info/model/basic_info.dart';
 
 class InfoProvider with ChangeNotifier {
@@ -18,9 +18,9 @@ class InfoProvider with ChangeNotifier {
   List<Experience> get experiences => _experiences;
   String experienceError = '';
 
-  List<Project> _projects = [];
-  List<Project> get projects => _projects;
-  String projectsError = '';
+  // List<Project> _projects = [];
+  // List<Project> get projects => _projects;
+  // String projectsError = '';
 
   bool isLoading = true;
 
@@ -34,13 +34,13 @@ class InfoProvider with ChangeNotifier {
     } catch (e) {
       bioError = "Bio Error ${e.toString()}";
     }
+    // try {
+    //   _projects = await ProjectService.instance.fetch();
+    // } catch (e) {
+    //   projectsError = "Bio Error ${e.toString()}";
+    // }
     try {
-      _projects = await ProjectService.instance.getAll();
-    } catch (e) {
-      projectsError = "Bio Error ${e.toString()}";
-    }
-    try {
-      _experiences = await ExperienceService.instance.getAll();
+      _experiences = await ExperienceService.instance.fetch();
     } catch (e) {
       experienceError = "Bio Error ${e.toString()}";
     }
@@ -77,7 +77,7 @@ class InfoProvider with ChangeNotifier {
       return;
     }
     try {
-      await ExperienceService.instance.edit(exp);
+      await ExperienceService.instance.update(exp);
       _experiences[index] = exp;
     } catch (e) {
       log('error updating experience $e');

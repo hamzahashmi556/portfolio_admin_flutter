@@ -1,58 +1,37 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:portfolio_admin/features/experience/model/experience.dart';
 
 class ExperienceService {
-  static ExperienceService instance = ExperienceService._privateConstructor();
+  ExperienceService._();
+  static final ExperienceService instance = ExperienceService._();
 
-  ExperienceService._privateConstructor();
+  CollectionReference<Map<String, dynamic>> get _col => FirebaseFirestore
+      .instance
+      .collection('portfolioData')
+      .doc('info')
+      .collection('experience');
 
-  final _dbRef = FirebaseFirestore.instance.collection('experience');
-
-  Future<List<Experience>> getAll() async {
-    try {
-      final snapshot = await _dbRef.get();
-      final docs = snapshot.docs;
-      final list = docs.map((doc) {
-        return Experience.fromMap(doc.data(), doc.id);
-      }).toList();
-      return list;
-    } catch (e) {
-      log('error getting experience $e');
-      rethrow;
-    }
+  Stream<List<Experience>> stream() {
+    return _col
+        .orderBy('startDate', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => Experience.fromDoc(d)).toList());
   }
 
-  Future<void> add(Experience experience) async {
-    try {
-      await _dbRef.add(experience.toMap());
-    } catch (e) {
-      log('error adding experience $e');
-      rethrow;
-    }
+  Future<List<Experience>> fetch() async {
+    final qs = await _col.orderBy('startDate', descending: true).get();
+    return qs.docs.map((d) => Experience.fromDoc(d)).toList();
   }
 
-  Future<void> edit(Experience experience) async {
-    if (experience.docId == null) {
-      return;
-    }
-    try {
-      await _dbRef.doc(experience.docId).set(experience.toMap());
-    } catch (e) {
-      log('error adding experience $e');
-      rethrow;
-    }
+  Future<void> add(Experience e) async {
+    await _col.add(e.toMap());
   }
 
-  Future<void> delete(Experience experience) async {
-    if (experience.docId == null) {
-      return;
-    }
-    try {
-      await _dbRef.doc(experience.docId).delete();
-    } catch (e) {
-      log('error adding experience $e');
-      rethrow;
-    }
+  Future<void> update(Experience e) async {
+    await _col.doc(e.id).update(e.toMap());
+  }
+
+  Future<void> delete(String id) async {
+    await _col.doc(id).delete();
   }
 }

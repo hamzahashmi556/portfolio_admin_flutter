@@ -1,31 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Experience {
-  final String? docId;
+  final String id;
   final String title;
   final String company;
-  final String? companyLink;
-  final String about;
+  final String location;
   final DateTime startDate;
   final DateTime? endDate;
+  final bool isCurrent;
+  final List<String> highlights;
+  final List<String> tech;
 
   Experience({
-    this.docId,
-    this.companyLink,
-    required this.startDate,
-    this.endDate,
-    required this.about,
+    required this.id,
     required this.title,
     required this.company,
+    required this.location,
+    required this.startDate,
+    required this.endDate,
+    required this.isCurrent,
+    required this.highlights,
+    required this.tech,
   });
 
-  factory Experience.fromMap(Map<String, dynamic> map, String docId) {
+  factory Experience.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
     return Experience(
-      docId: docId,
-      title: map['title'],
-      company: map['company'],
-      companyLink: map['companyLink'],
-      startDate: map['startDate'] as DateTime,
-      endDate: map['endDate'] as DateTime,
-      about: map['about'],
+      id: doc.id,
+      title: data['title'] ?? '',
+      company: data['company'] ?? '',
+      location: data['location'] ?? '',
+      startDate: (data['startDate'] as Timestamp).toDate(),
+      endDate: data['endDate'] == null
+          ? null
+          : (data['endDate'] as Timestamp).toDate(),
+      isCurrent: data['isCurrent'] ?? false,
+      highlights: List<String>.from(data['highlights'] ?? const []),
+      tech: List<String>.from(data['tech'] ?? const []),
     );
   }
 
@@ -33,10 +44,36 @@ class Experience {
     return {
       'title': title,
       'company': company,
-      'companyLink': companyLink,
-      'startDate': startDate,
-      'endDate': endDate,
-      'about': about,
+      'location': location,
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': endDate == null ? null : Timestamp.fromDate(endDate!),
+      'isCurrent': isCurrent,
+      'highlights': highlights,
+      'tech': tech,
     };
+  }
+
+  Experience copyWith({
+    String? id,
+    String? title,
+    String? company,
+    String? location,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCurrent,
+    List<String>? highlights,
+    List<String>? tech,
+  }) {
+    return Experience(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      company: company ?? this.company,
+      location: location ?? this.location,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isCurrent: isCurrent ?? this.isCurrent,
+      highlights: highlights ?? this.highlights,
+      tech: tech ?? this.tech,
+    );
   }
 }
