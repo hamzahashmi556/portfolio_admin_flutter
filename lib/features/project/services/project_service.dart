@@ -1,26 +1,45 @@
+import 'dart:developer';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:portfolio_admin/features/project/model/project.dart';
 
 class ProjectService {
-  ProjectService._();
-  static final ProjectService instance = ProjectService._();
+  ProjectService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
-  CollectionReference<Map<String, dynamic>> get _col => FirebaseFirestore
-      .instance
-      .collection('portfolioData')
-      .doc('info')
-      .collection('projects');
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  Stream<List<Project>> stream() {
-    return _col
-        .orderBy('featured', descending: true)
-        .orderBy('sortOrder')
-        .orderBy('startDate', descending: true)
-        .snapshots()
-        .map((snap) => snap.docs.map((d) => Project.fromDoc(d)).toList());
+  CollectionReference<Map<String, dynamic>> _col(String uid) =>
+      _firestore.collection('users').doc(uid).collection('projects');
+
+  Stream<List<Project>> streamProjects() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return const Stream.empty();
+    Query<Map<String, dynamic>> q = _col(uid);
+    return q.snapshots().map((snap) => snap.docs.map(Project.fromDoc).toList());
   }
 
-  Future<void> add(Project p) async => _col.add(p.toMap());
-  Future<void> update(Project p) async => _col.doc(p.id).update(p.toMap());
-  Future<void> delete(String id) async => _col.doc(id).delete();
+  Future<String> create(Project project) async {
+    final uid = _auth.currentUser!.uid;
+    final ref = _col(uid).doc(); // generate id server-side
+    await ref.set(project.copyWith(id: ref.id).toMapForWrite(isCreate: true));
+    return ref.id;
+  }
+
+  Future<void> update(Project project) async {
+    final uid = _auth.currentUser!.uid;
+    final id = project.id;
+    if (id == null || id.isEmpty) {
+      throw StateError('Project id is required for update');
+    }
+    await _col(uid).doc(id).update(project.toMapForWrite(isCreate: false));
+  }
+
+  Future<void> delete(String id) async {
+    final uid = _auth.currentUser!.uid;
+    await _col(uid).doc(id).delete();
+  }
 }

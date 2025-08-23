@@ -24,32 +24,24 @@ class _HomeScreenState extends State<HomeScreen> {
     // final info = provider.info;
     // final expreinceList = provider.experiences;
     // final projects = provider.projects;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Portfolio Admin Panel"),
-        actions: [
-          IconButton(
-            onPressed: provider.loadData,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: provider.loadData,
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  BioCard(),
-                  const Divider(),
-                  ExperienceCard(),
-                  ProjectListScreen(),
-                  // ProjectCard(),
-                  // buildProjectList(projects),
-                ],
-              ),
-            ),
-    );
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return RefreshIndicator(
+        onRefresh: provider.loadData,
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          children: [
+            Expanded(child: BioCard()),
+            const Divider(),
+            Expanded(child: ExperienceCard()),
+            const Divider(),
+            Expanded(child: ProjectListScreen()),
+            // ProjectCard(),
+            // buildProjectList(projects),
+          ],
+        ),
+      );
+    }
   }
 }
