@@ -106,7 +106,7 @@ class _ProjectListBodyState extends State<_ProjectListBody> {
                 Column(
                   children: [
                     for (final p in items)
-                      AdminProjectCard(
+                      ProjectCard(
                         project: p,
                         // onTap: () => showDialog(
                         //   context: context,
