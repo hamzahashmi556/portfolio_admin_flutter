@@ -1,6 +1,7 @@
 // lib/features/project/projects_provider.dart
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:portfolio_admin/features/project/model/project.dart';
 import 'package:portfolio_admin/features/project/services/project_service.dart';
@@ -84,7 +85,7 @@ class ProjectsProvider with ChangeNotifier {
       },
       onError: (e, st) {
         _lastError = e.toString();
-        debugPrint('🔥 Projects stream error: $e');
+        log('🔥 Projects stream error: $e');
         debugPrintStack(stackTrace: st);
         notifyListeners();
       },
@@ -144,11 +145,19 @@ class ProjectsProvider with ChangeNotifier {
       debugPrint('⚠️ Cannot delete: project id is null/empty');
       return;
     }
-    await service.delete(id);
+    try {
+      await service.delete(id);
+    } catch (e) {
+      log('⚠️ Error deleting project id=$id: $e');
+    }
   }
 
   Future<void> toggleFeatured(Project p) async {
-    await service.update(p.copyWith(featured: !p.featured));
+    try {
+      await service.update(p.copyWith(featured: !p.featured));
+    } catch (e) {
+      log('⚠️ Error toggling featured for project id=${p.id}: $e');
+    }
   }
 
   // ---------------------------

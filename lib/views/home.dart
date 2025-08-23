@@ -32,11 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 20),
           children: [
-            Expanded(child: BioCard()),
+            BioCard(),
             const Divider(),
-            Expanded(child: ExperienceCard()),
+            ExperienceCard(),
             const Divider(),
-            Expanded(child: ProjectListScreen()),
+            ProjectListScreen(),
             // ProjectCard(),
             // buildProjectList(projects),
           ],

@@ -1,5 +1,3 @@
-import 'dart:developer';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:portfolio_admin/features/project/model/project.dart';
@@ -23,14 +21,16 @@ class ProjectService {
   }
 
   Future<String> create(Project project) async {
-    final uid = _auth.currentUser!.uid;
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Future.error('unable to get user');
     final ref = _col(uid).doc(); // generate id server-side
     await ref.set(project.copyWith(id: ref.id).toMapForWrite(isCreate: true));
     return ref.id;
   }
 
   Future<void> update(Project project) async {
-    final uid = _auth.currentUser!.uid;
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Future.error('unable to get user');
     final id = project.id;
     if (id == null || id.isEmpty) {
       throw StateError('Project id is required for update');
@@ -39,7 +39,8 @@ class ProjectService {
   }
 
   Future<void> delete(String id) async {
-    final uid = _auth.currentUser!.uid;
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Future.error('unable to get user');
     await _col(uid).doc(id).delete();
   }
 }

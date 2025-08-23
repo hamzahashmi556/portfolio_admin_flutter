@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../project/model/project.dart';
 import '../../project/services/project_service.dart';
 
@@ -123,10 +122,31 @@ class _ProjectEditorDialogState extends State<ProjectEditorDialog> {
     );
 
     if (widget.initial == null) {
-      await widget.service.create(project);
+      try {
+        await widget.service.create(project);
+      } catch (e) {
+        if (mounted) {
+          print('Error updating project: $e');
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error saving project: $e')));
+        }
+        return;
+      }
     } else {
-      await widget.service.update(project);
+      try {
+        await widget.service.update(project);
+      } catch (e) {
+        if (mounted) {
+          print('Error updating project: $e');
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error updating project: $e')));
+        }
+        return;
+      }
     }
+
     if (mounted) Navigator.of(context).pop(true);
   }
 

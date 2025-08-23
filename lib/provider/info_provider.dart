@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:portfolio_admin/features/experience/model/experience.dart';
 import 'package:portfolio_admin/features/basic_info/service/bio_service.dart';
@@ -24,7 +23,6 @@ class InfoProvider with ChangeNotifier {
   InfoProvider() {
     loadData();
   }
-
   Future<void> loadData() async {
     try {
       _info = await BioService.instance.getBasicInfo();
