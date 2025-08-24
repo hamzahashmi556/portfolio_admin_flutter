@@ -30,7 +30,7 @@ class AuthGate extends StatelessWidget {
     );
   }
 }
-
+/*
 /// Ensures the signed-in user is an admin.
 /// Firestore rule: collection `admins/{uid}` with a document existing for admins.
 class AdminGuard extends StatelessWidget {
@@ -76,3 +76,4 @@ class AdminGuard extends StatelessWidget {
     );
   }
 }
+*/
