@@ -20,62 +20,63 @@ class _BioCardState extends State<BioCard> {
     final info = provider.info;
     if (error.isNotEmpty) {
       return Text(error);
-    } else if (info != null) {
-      return Card(
-        elevation: 3,
-        margin: const EdgeInsets.all(10),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    info.name,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      showEditBasicInfoDialog(info);
-                    },
-                  ),
-                ],
-              ),
-              boldText('Email Address:'),
-              Text(info.email),
-
-              boldText('HeadLine'),
-              Text(info.headline),
-
-              boldText('Experience:'),
-              Text("${info.experience} years"),
-
-              boldText('About'),
-              Text(info.about),
-
-              boldText('Skills'),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Wrap(
-                  spacing: 8,
-                  children: info.skills
-                      .map((skill) => Chip(label: Text(skill)))
-                      .toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      return const Text("No Info Found");
     }
+    //  else if (info != null) {
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.all(10),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  info?.name ?? "",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    showEditBasicInfoDialog(info);
+                  },
+                ),
+              ],
+            ),
+            boldText('Email Address:'),
+            Text(info?.email ?? ""),
+
+            boldText('HeadLine'),
+            Text(info?.headline ?? ""),
+
+            boldText('Experience:'),
+            Text("${info?.experience} years"),
+
+            boldText('About'),
+            Text(info?.about ?? ""),
+
+            boldText('Skills'),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Wrap(
+                spacing: 8,
+                children: (info?.skills ?? [])
+                    .map((skill) => Chip(label: Text(skill)))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    // } else {
+    //   return const Text("No Info Found");
+    // }
   }
 
   Widget boldText(String title) {
@@ -91,7 +92,7 @@ class _BioCardState extends State<BioCard> {
     );
   }
 
-  void showEditBasicInfoDialog(BasicInfo info) {
+  void showEditBasicInfoDialog(BasicInfo? info) {
     showDialog(
       context: context,
       animationStyle: AnimationStyle(

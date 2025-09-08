@@ -7,24 +7,25 @@ import 'package:provider/provider.dart';
 class EditBio extends StatefulWidget {
   final TextEditingController nameController;
   final TextEditingController headlineController;
+  final TextEditingController aboutController;
   final TextEditingController phoneController;
   final TextEditingController emailController;
   final TextEditingController companyController;
   final TextEditingController experienceController;
-  final String about;
+  // final String about;
   final List<String> skills;
 
-  EditBio(BasicInfo info, {super.key})
-    : nameController = TextEditingController(text: info.name),
-      headlineController = TextEditingController(text: info.headline),
-      phoneController = TextEditingController(text: info.phoneNumber),
-      emailController = TextEditingController(text: info.email),
-      companyController = TextEditingController(text: info.companyLink),
+  EditBio(BasicInfo? info, {super.key})
+    : nameController = TextEditingController(text: info?.name),
+      headlineController = TextEditingController(text: info?.headline),
+      phoneController = TextEditingController(text: info?.phoneNumber),
+      emailController = TextEditingController(text: info?.email),
+      companyController = TextEditingController(text: info?.companyLink),
       experienceController = TextEditingController(
-        text: info.experience.toString(),
+        text: info?.experience.toString(),
       ),
-      skills = info.skills,
-      about = info.about;
+      skills = info?.skills ?? [],
+      aboutController = TextEditingController(text: info?.about);
 
   @override
   State<EditBio> createState() => _EditBioState();
@@ -46,6 +47,7 @@ class _EditBioState extends State<EditBio> {
               controller: widget.headlineController,
               label: 'headline',
             ),
+            CustomInput(controller: widget.aboutController, label: 'about'),
             CustomInput(controller: widget.phoneController, label: 'phone'),
             CustomInput(controller: widget.emailController, label: 'email'),
             CustomInput(controller: widget.companyController, label: 'company'),
@@ -136,7 +138,8 @@ class _EditBioState extends State<EditBio> {
                               widget.experienceController.text.trim(),
                             ) ??
                             0,
-                        about: widget.about, // keeping same for now
+                        about: widget.aboutController.text
+                            .trim(), // keeping same for now
                         skills: widget.skills,
                       );
 

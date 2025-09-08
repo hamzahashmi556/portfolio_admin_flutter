@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
-    this.presetEmail = '',
+    this.presetEmail = 'admin@hamzaportfolio.online',
     this.showGoogle = false,
   });
   final String presetEmail;
@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late final TextEditingController _email = TextEditingController(
     text: widget.presetEmail,
   );
-  final _password = TextEditingController();
+  final _password = TextEditingController(text: 'Pci3admin@8793');
   bool _busy = false;
   String? _error;
 

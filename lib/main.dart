@@ -13,7 +13,7 @@ void main() async {
   // Put this after WidgetsFlutterBinding.ensureInitialized();
   FlutterError.demangleStackTrace = (StackTrace stack) {
     // Try to demangle web stack traces so types/lines are meaningful
-    if (stack is StackTrace) return stack;
+    // if (stack is StackTrace) return stack;
     try {
       final stackString = stack.toString();
       // In debug this is enough; in release you'll still want to run debug once.

@@ -16,7 +16,7 @@ class ProjectService {
   Stream<List<Project>> streamProjects() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return const Stream.empty();
-    Query<Map<String, dynamic>> q = _col(uid);
+    Query<Map<String, dynamic>> q = _col(uid).orderBy('startDate');
     return q.snapshots().map((snap) => snap.docs.map(Project.fromDoc).toList());
   }
 

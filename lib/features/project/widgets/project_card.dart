@@ -39,7 +39,10 @@ class ProjectCard extends StatelessWidget {
                 child:
                     project.coverImageUrl != null &&
                         project.coverImageUrl!.isNotEmpty
-                    ? Image.network(project.coverImageUrl!, fit: BoxFit.cover)
+                    ? Image.network(
+                        project.coverImageUrl!,
+                        fit: BoxFit.scaleDown,
+                      )
                     : Container(
                         color: Colors.grey.shade200,
                         alignment: Alignment.center,
@@ -111,6 +114,15 @@ class ProjectCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (project.startDate != null && project.endDate != null)
+                        Expanded(
+                          child: Text(
+                            project.startDate!.toString(),
+                            style: theme.textTheme.bodySmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       const SizedBox(height: 6),
                       // Chips (very compact, ellipsized after a few)
                       _MiniChips(tech: project.tech, tags: project.tags),

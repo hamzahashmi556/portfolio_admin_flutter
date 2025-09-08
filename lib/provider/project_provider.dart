@@ -29,6 +29,9 @@ class ProjectsProvider with ChangeNotifier {
   List<Project> get projects {
     // 1) clone
     var list = List<Project>.from(_all);
+    // list.sort((p1, p2) {
+    //   return p1.startDate?.compareTo(p2.startDate ?? DateTime(1970)) ?? 0;
+    // });
 
     // 2) client-side search
     if (_query.isNotEmpty) {

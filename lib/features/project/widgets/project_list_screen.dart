@@ -35,7 +35,7 @@ class _ProjectListBodyState extends State<_ProjectListBody> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProjectsProvider>();
-    final items = provider.projects;
+    var items = provider.projects;
 
     return LayoutBuilder(
       builder: (context, c) {
@@ -104,6 +104,7 @@ class _ProjectListBodyState extends State<_ProjectListBody> {
                 const Center(child: Text('No projects yet'))
               else
                 Column(
+                  spacing: 30,
                   children: [
                     for (final p in items)
                       ProjectCard(
