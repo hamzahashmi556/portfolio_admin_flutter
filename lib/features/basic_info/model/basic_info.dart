@@ -3,6 +3,7 @@ class BasicInfo {
   final String headline;
   final String phoneNumber;
   final String email;
+  final String imageURL;
   final String companyLink;
   final int experience; // in years
   final String about;
@@ -11,6 +12,7 @@ class BasicInfo {
   BasicInfo({
     required this.name,
     required this.headline,
+    required this.imageURL,
     required this.phoneNumber,
     required this.email,
     required this.companyLink,
@@ -23,6 +25,7 @@ class BasicInfo {
     return BasicInfo(
       name: map['name'],
       headline: map['headline'] ?? '',
+      imageURL: map['imageURL'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       email: map['email'] ?? '',
       companyLink: map['companyLink'] ?? '',
@@ -36,6 +39,7 @@ class BasicInfo {
     return {
       'name': name,
       'headline': headline,
+      'imageURL': imageURL,
       'phoneNumber': phoneNumber,
       'email': email,
       'companyLink': companyLink,
