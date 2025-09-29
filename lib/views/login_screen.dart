@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
-    this.presetEmail = 'admin@hamzaportfolio.online',
+    this.presetEmail = '',
     this.showGoogle = false,
   });
   final String presetEmail;
