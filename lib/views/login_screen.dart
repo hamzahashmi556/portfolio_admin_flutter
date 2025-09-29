@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late final TextEditingController _email = TextEditingController(
     text: widget.presetEmail,
   );
-  final _password = TextEditingController(text: 'Pci3admin@8793');
+  final _password = TextEditingController(text: '');
   bool _busy = false;
   String? _error;
 
