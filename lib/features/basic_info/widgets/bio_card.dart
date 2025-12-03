@@ -61,14 +61,32 @@ class _BioCardState extends State<BioCard> {
             Text(info?.about ?? ""),
 
             boldText('Skills'),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Wrap(
-                spacing: 8,
-                children: (info?.skills ?? [])
-                    .map((skill) => Chip(label: Text(skill)))
-                    .toList(),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: (info?.newSkills ?? {}).entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        children: entry.value
+                            .map((skill) => Chip(label: Text(skill)))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

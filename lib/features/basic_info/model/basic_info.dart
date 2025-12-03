@@ -7,7 +7,8 @@ class BasicInfo {
   final String companyLink;
   final int experience; // in years
   final String about;
-  final List<String> skills;
+  // final List<String> skills;
+  final Map<String, List<String>> newSkills;
 
   BasicInfo({
     required this.name,
@@ -18,10 +19,28 @@ class BasicInfo {
     required this.companyLink,
     required this.experience,
     required this.about,
-    required this.skills,
+    required this.newSkills,
   });
 
   factory BasicInfo.fromMap(Map<String, dynamic> map) {
+    // final skills = List<String>.from(map['skills'] ?? const []);
+    // Safe parse for new_skills which is stored as a Map<String, List>
+    final rawNewSkills = map['newSkills'];
+    final Map<String, List<String>> parsedNewSkills = {};
+    if (rawNewSkills != null && rawNewSkills is Map) {
+      rawNewSkills.forEach((key, value) {
+        if (value is List) {
+          // convert each item to string to be safe
+          parsedNewSkills[key.toString()] = value
+              .map((e) => e?.toString() ?? '')
+              .where((s) => s.isNotEmpty)
+              .toList();
+        } else if (value != null) {
+          // single value -> convert to single-item list
+          parsedNewSkills[key.toString()] = [value.toString()];
+        }
+      });
+    }
     return BasicInfo(
       name: map['name'],
       headline: map['headline'] ?? '',
@@ -31,7 +50,7 @@ class BasicInfo {
       companyLink: map['companyLink'] ?? '',
       experience: map['experience'] ?? 0,
       about: map['about'] ?? '',
-      skills: List<String>.from(map['skills'] ?? []),
+      newSkills: parsedNewSkills,
     );
   }
 
@@ -45,7 +64,7 @@ class BasicInfo {
       'companyLink': companyLink,
       'experience': experience,
       'about': about,
-      'skills': skills,
+      'newSkills': newSkills,
     };
   }
 }

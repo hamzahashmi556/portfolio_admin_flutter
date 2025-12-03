@@ -13,8 +13,9 @@ class EditBio extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController companyController;
   final TextEditingController experienceController;
+  final BasicInfo? bio;
   // final String about;
-  final List<String> skills;
+  // final List<String> skills;
 
   EditBio(BasicInfo? info, {super.key})
     : nameController = TextEditingController(text: info?.name),
@@ -26,7 +27,8 @@ class EditBio extends StatefulWidget {
       experienceController = TextEditingController(
         text: info?.experience.toString(),
       ),
-      skills = info?.skills ?? [],
+      // skills = info?.skills ?? [],
+      bio = info,
       aboutController = TextEditingController(text: info?.about);
 
   @override
@@ -35,6 +37,18 @@ class EditBio extends StatefulWidget {
 
 class _EditBioState extends State<EditBio> {
   final skillController = TextEditingController();
+  late Map<String, List<String>> categorizedSkills;
+  String selectedCategory = "";
+
+  @override
+  void initState() {
+    super.initState();
+    categorizedSkills = Map.from(widget.bio?.newSkills ?? {});
+    if (categorizedSkills.keys.isNotEmpty) {
+      selectedCategory = categorizedSkills.keys.first;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -48,7 +62,7 @@ class _EditBioState extends State<EditBio> {
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [textFields(), addSkillField(), skillsWrap()],
+                children: [textFields(), skillSection(), skillsWrap()],
               ),
             ),
           ),
@@ -62,16 +76,46 @@ class _EditBioState extends State<EditBio> {
     );
   }
 
+  Widget skillSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 20,
+      children: [
+        Row(
+          children: [
+            Expanded(child: categoryDropdown()),
+            addCategoryButton(),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: CustomInput(
+                controller: skillController,
+                label: "Add Skill",
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: addSkillToCategory,
+            ),
+          ],
+        ),
+        skillsWrap(),
+      ],
+    );
+  }
+
   Widget skillsWrap() {
     return Wrap(
       spacing: 8,
-      children: widget.skills
+      children: categorizedSkills[selectedCategory]!
           .map(
             (s) => Chip(
               label: Text(s),
               onDeleted: () => {
                 setState(() {
-                  widget.skills.remove(s);
+                  categorizedSkills[selectedCategory]!.remove(s);
                 }),
               },
             ),
@@ -80,26 +124,84 @@ class _EditBioState extends State<EditBio> {
     );
   }
 
-  Widget addSkillField() {
-    return Row(
-      children: [
-        Expanded(
-          child: CustomInput(controller: skillController, label: "Add Skill"),
-        ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () {
-            setState(() {
-              if (skillController.text.trim().isNotEmpty) {
-                widget.skills.add(skillController.text.trim());
-                skillController.clear();
-              }
-            });
-          },
-        ),
-      ],
+  Widget categoryDropdown() {
+    return DropdownButtonFormField<String>(
+      value: selectedCategory.isEmpty ? null : selectedCategory,
+      items: categorizedSkills.keys
+          .map((key) => DropdownMenuItem(value: key, child: Text(key)))
+          .toList(),
+      onChanged: (val) {
+        setState(() {
+          selectedCategory = val ?? "";
+        });
+      },
+      decoration: const InputDecoration(labelText: "Category"),
     );
   }
+
+  final categoryController = TextEditingController();
+
+  Widget addCategoryButton() {
+    return IconButton(
+      icon: const Icon(Icons.create_new_folder),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text("New Category"),
+              content: CustomInput(
+                controller: categoryController,
+                label: "Category Name",
+              ),
+              actions: [
+                TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                ElevatedButton(
+                  child: Text("Add"),
+                  onPressed: () {
+                    final name = categoryController.text.trim();
+                    if (name.isNotEmpty &&
+                        !categorizedSkills.containsKey(name)) {
+                      setState(() {
+                        categorizedSkills[name] = [];
+                        selectedCategory = name;
+                      });
+                    }
+                    categoryController.clear();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Widget addSkillField() {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: CustomInput(controller: skillController, label: "Add Skill"),
+  //       ),
+  //       IconButton(
+  //         icon: const Icon(Icons.add),
+  //         onPressed: () {
+  //           setState(() {
+  //             if (skillController.text.trim().isNotEmpty) {
+  //               widget.skills.add(skillController.text.trim());
+  //               skillController.clear();
+  //             }
+  //           });
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget textFields() {
     return Column(
@@ -149,7 +251,7 @@ class _EditBioState extends State<EditBio> {
             experience:
                 int.tryParse(widget.experienceController.text.trim()) ?? 0,
             about: widget.aboutController.text.trim(), // keeping same for now
-            skills: widget.skills,
+            newSkills: categorizedSkills,
           );
 
           await Provider.of<InfoProvider>(
@@ -157,17 +259,27 @@ class _EditBioState extends State<EditBio> {
             listen: false,
           ).setBio(updatedInfo);
 
-          if (!context.mounted) {
-            return; // ✅ Prevents using context if widget is disposed
+          if (context.mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Basic Info Updated!")),
+            );
           }
-
-          Navigator.pop(context);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("Basic Info Updated!")));
         },
         child: Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
+  }
+
+  void addSkillToCategory() {
+    if (selectedCategory.isEmpty) return;
+
+    final skill = skillController.text.trim();
+    if (skill.isEmpty) return;
+
+    setState(() {
+      categorizedSkills[selectedCategory]!.add(skill);
+      skillController.clear();
+    });
   }
 }
