@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:portfolio_admin/features/basic_info/model/basic_info.dart';
 import 'package:portfolio_admin/provider/info_provider.dart';
@@ -62,7 +64,7 @@ class _EditBioState extends State<EditBio> {
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [textFields(), skillSection(), skillsWrap()],
+                children: [textFields(), skillSection()],
               ),
             ),
           ),
@@ -84,6 +86,8 @@ class _EditBioState extends State<EditBio> {
         Row(
           children: [
             Expanded(child: categoryDropdown()),
+            editCategoryButton(),
+            deleteCategoryButton(),
             addCategoryButton(),
           ],
         ),
@@ -106,7 +110,97 @@ class _EditBioState extends State<EditBio> {
     );
   }
 
+  Widget deleteCategoryButton() {
+    return IconButton(
+      icon: const Icon(Icons.delete_outline),
+      color: Colors.redAccent,
+      tooltip: "Delete Category",
+      onPressed: selectedCategory.isEmpty
+          ? null
+          : () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("Delete Category"),
+                  content: Text(
+                    "Delete \"$selectedCategory\" and all its skills?",
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                      ),
+                      child: const Text("Delete"),
+                      onPressed: () {
+                        setState(() {
+                          categorizedSkills.remove(selectedCategory);
+                          selectedCategory = categorizedSkills.keys.isNotEmpty
+                              ? categorizedSkills.keys.first
+                              : "";
+                        });
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+    );
+  }
+
+  Widget editCategoryButton() {
+    return IconButton(
+      icon: const Icon(Icons.edit),
+      tooltip: "Edit Category",
+      onPressed: selectedCategory.isEmpty
+          ? null
+          : () {
+              categoryController.text = selectedCategory;
+
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("Edit Category"),
+                  content: CustomInput(
+                    controller: categoryController,
+                    label: "Category Name",
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    ElevatedButton(
+                      child: const Text("Save"),
+                      onPressed: () {
+                        final newName = categoryController.text.trim();
+                        if (newName.isNotEmpty &&
+                            !categorizedSkills.containsKey(newName)) {
+                          setState(() {
+                            categorizedSkills[newName] = categorizedSkills
+                                .remove(selectedCategory)!;
+                            selectedCategory = newName;
+                          });
+                        }
+                        categoryController.clear();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+    );
+  }
+
   Widget skillsWrap() {
+    if (selectedCategory.isEmpty) {
+      return Text('No Skills');
+    }
     return Wrap(
       spacing: 8,
       children: categorizedSkills[selectedCategory]!
